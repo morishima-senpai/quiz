@@ -209,8 +209,8 @@ npm start
 
 ### Quiz Endpoints
 - POST `/api/sessions/new_session/`: Start new quiz session
-- POST `/api/sessions/<session_id>/submit_answer`: Answer questions and gets a new one
-- POST `/api/sessions/<session_id>/skip_and_finish`: Skips the quiz and shows retuns the result of the session
+- POST `/api/sessions/<session_id>/submit_answer/`: Answer questions and gets a new one
+- POST `/api/sessions/<session_id>/skip_and_finish/`: Skips the quiz and shows retuns the result of the session
 - GET `/api/stats/`: Get user's statistics
 
 ## Contributing
