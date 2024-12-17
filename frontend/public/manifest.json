@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Quiz App",
+  "name": "Interactive Quiz Application",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,16 +10,44 @@
     {
       "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#3B82F6",
+  "background_color": "#F3F4F6",
+  "orientation": "portrait",
+  "description": "Test your knowledge with interactive quizzes",
+  "dir": "ltr",
+  "lang": "en-US",
+  "categories": ["education", "games"],
+  "screenshots": [
+    {
+      "src": "screenshot1.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Take Quiz",
+      "url": "/quiz",
+      "description": "Start a new quiz session"
+    },
+    {
+      "name": "Dashboard",
+      "url": "/dashboard",
+      "description": "View your quiz statistics"
+    }
+  ]
 }

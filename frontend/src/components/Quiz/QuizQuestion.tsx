@@ -1,39 +1,83 @@
 import React, { useState } from 'react';
-import { Question } from '../../services/types';
+import { Question } from '../../types';
+import Button from '../Common/Button';
 
 interface QuizQuestionProps {
     question: Question;
     onAnswerSelect: (optionId: string) => void;
+    disabled?: boolean;
 }
 
-const QuizQuestion: React.FC<QuizQuestionProps> = ({question, onAnswerSelect}) => {
+
+
+const QuizQuestion: React.FC<QuizQuestionProps> = ({ question,  onAnswerSelect, disabled = false }) => {
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
-    const handleOptionSelect = (optionId: string) => {
-        setSelectedOption(optionId);
-        onAnswerSelect(optionId);
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (selectedOption && !disabled) {
+            onAnswerSelect(selectedOption);
+            setSelectedOption(null);
+        }
     };
 
     return (
-        <div className="bg-white shadow-md rounded-lg p-6">
-            <h2 className="text-xl font-bold mb-4">{question.text}</h2>
-            <div className="space-y-3">
-                {question.options.map((option) => (
-                    <button
-                        key={option.id}
-                        onClick={() => handleOptionSelect(option.id)}
-                        className={
-                            `w-full p-3 text-left rounded-lg transition-colors 
-                            ${selectedOption === option.id
-                                ? 'bg-blue-500 text-white'
-                                : 'bg-gray-100 hover:bg-gray-200'}
-                            `
-                        }
-                    >
-                        {option.text}
-                    </button>
-                ))}
+        <div className="space-y-6">
+            <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="flex justify-between items-center mb-4">
+                    <span className={`text-sm font-medium px-3 py-1 rounded-full ${
+                        question.difficulty === 'easy' 
+                            ? 'bg-green-100 text-green-800'
+                            : question.difficulty === 'medium'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
+                    }`}>
+                        {question.difficulty.charAt(0).toUpperCase() + question.difficulty.slice(1)}
+                    </span>
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900">
+                    {question.text}
+                </h2>
             </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                    {question.options.map((option) => (
+                        <label
+                            key={option.id}
+                            className={`block p-4 rounded-lg border-2 cursor-pointer transition-colors
+                                ${disabled ? 'opacity-75 cursor-not-allowed' : ''}
+                                ${selectedOption === option.id 
+                                    ? 'border-blue-500 bg-blue-50' 
+                                    : 'border-gray-200 hover:border-gray-300'
+                                }`}
+                        >
+                            <div className="flex items-center">
+                                <input
+                                    type="radio"
+                                    name="answer"
+                                    value={option.id}
+                                    checked={selectedOption === option.id}
+                                    onChange={() => setSelectedOption(option.id)}
+                                    disabled={disabled}
+                                    className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500 disabled:opacity-50"
+                                />
+                                <span className="ml-3 text-gray-900">
+                                    {option.text}
+                                </span>
+                            </div>
+                        </label>
+                    ))}
+                </div>
+
+                <Button
+                    type="submit"
+                    disabled={!selectedOption || disabled}
+                    className="w-full"
+                >
+                    {disabled ? 'Submitting...' : 'Submit Answer'}
+                </Button>
+            </form>
         </div>
     );
 };

@@ -20,9 +20,9 @@ class Question(models.Model):
         default='medium'
     )
 
-    # @property
-    # def options(self):
-    #     return QuestionOption.objects.filter(question=self)
+    @property
+    def options(self):
+        return QuestionOption.objects.filter(question=self)
 
     def __str__(self):
         return self.text[:50]
@@ -51,7 +51,7 @@ class QuizSession(models.Model):
     @property
     def score_percentage(self):
         if self.total_questions > 0:
-            return (self.correct_answers / self.total_questions) * 100
+            return round((self.correct_answers / self.total_questions) * 100, 1)
         return 0
 
     def __str__(self):

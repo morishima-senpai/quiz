@@ -1,39 +1,82 @@
 import React from 'react';
-import { AnswerSubmitResponse } from '../../services/types';
+import { useNavigate } from 'react-router-dom';
+import { AnswerSubmitResponse } from '../../types/';
+import Button from '../Common/Button';
+import { useAuth } from 'components/Auth/AuthContext';
+
 
 interface QuizSummaryProps {
     summary: AnswerSubmitResponse;
 }
 
+
 const QuizSummary: React.FC<QuizSummaryProps> = ({ summary }) => {
+    const navigate = useNavigate();
+    const { fetchStats } = useAuth();
+    const handleBackToDashboard = () => {
+        fetchStats();
+        navigate('/dashboard');
+    };
+
+    const handleGoToAnalysis = () => {
+        navigate('/attempts');
+    };
+
     return (
-        <div className="max-w-md mx-auto p-6 bg-white shadow-lg rounded-lg text-center">
-            <h2 className="text-2xl font-bold mb-4">Quiz Completed!</h2>
-
-            <div className="grid grid-cols-2 gap-4 mb-6">
-                <div>
-                    <p className="text-gray-600">Total Questions</p>
-                    <p className="text-xl font-bold">{summary.total_questions}</p>
-                </div>
-                <div>
-                    <p className="text-gray-600">Correct Answers</p>
-                    <p className="text-xl font-bold">{summary.correct_answers}</p>
-                </div>
-            </div>
-
-            <div className="mb-6">
-                <p className="text-gray-600">Your Score</p>
-                <p className="text-3xl font-bold text-green-600">
-                    {summary.score_percentage?.toFixed(2)}%
+        <div className="space-y-8">
+            <div className="text-center">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    Quiz Complete!
+                </h2>
+                <p className="text-gray-600">
+                    Here's how you did:
                 </p>
             </div>
 
-            <button
-                onClick={() => window.location.reload()}
-                className="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600"
-            >
-                Start New Quiz
-            </button>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-blue-50 p-6 rounded-lg text-center">
+                    <p className="text-sm text-blue-600 font-medium mb-1">
+                        Total Questions
+                    </p>
+                    <p className="text-3xl font-bold text-blue-900">
+                        {summary.total_questions}
+                    </p>
+                </div>
+
+                <div className="bg-green-50 p-6 rounded-lg text-center">
+                    <p className="text-sm text-green-600 font-medium mb-1">
+                        Correct Answers
+                    </p>
+                    <p className="text-3xl font-bold text-green-900">
+                        {summary.correct_answers}
+                    </p>
+                </div>
+
+                <div className="bg-purple-50 p-6 rounded-lg text-center">
+                    <p className="text-sm text-purple-600 font-medium mb-1">
+                        Score
+                    </p>
+                    <p className="text-3xl font-bold text-purple-900">
+                        {summary.score_percentage}%
+                    </p>
+                </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
+                <Button
+                    onClick={handleGoToAnalysis}
+                    className="sm:w-auto"
+                >
+                    Analysis
+                </Button>
+                <Button
+                    variant="secondary"
+                    onClick={handleBackToDashboard}
+                    className="sm:w-auto"
+                >
+                    Back to Dashboard
+                </Button>
+            </div>
         </div>
     );
 };

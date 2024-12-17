@@ -2,10 +2,15 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.db.models import Count, Q
+from django.db.models import (
+    Count, Q, Avg, Max,
+    F, FloatField, ExpressionWrapper
+)
 from .models import Question, QuizSession, QuizAttempt, QuestionOption
-from .serializers import QuestionSerializer, QuizSessionSerializer
+from .serializers import QuestionSerializer, QuizSessionSerializer, AttemptSerializer,StatisticsSerializer 
 from rest_framework.authentication import TokenAuthentication
+
+
 
 # Create your views here.
 
@@ -25,12 +30,10 @@ class QuizSessionViewSet(viewsets.ModelViewSet):
         return QuizSession.objects.filter(user=self.request.user)
 
     @action(detail=False, methods=['POST'])
-    def start_session(self, request):
+    def new_session(self, request):
         """
         start a new quiz session for the authenticated user and sends a new random question from DB
         """
-        
-        session = QuizSession.objects.create(user=request.user)
         
         # get a random question not previously answered in this session
         question = Question.objects.annotate(
@@ -42,10 +45,11 @@ class QuizSessionViewSet(viewsets.ModelViewSet):
             quizattempt__session__user=request.user
         ).order_by('?').first()
 
+        # no more questions
         if not question:
-            return Response({
-                "error": "out of questions"
-            }, status=status.HTTP_404_NOT_FOUND)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        session = QuizSession.objects.create(user=request.user)
 
         serializer = QuestionSerializer(question)
         return Response({
@@ -66,7 +70,14 @@ class QuizSessionViewSet(viewsets.ModelViewSet):
             return Response({
                 "error": "not permitted"
             },status=status.HTTP_403_FORBIDDEN)
+        
 
+        serializer = AttemptSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({
+                "error": "select question and answer"
+            },status=status.HTTP_400_BAD_REQUEST)
+        
         question_id = request.data.get('question_id')
         option_id = request.data.get('option_id')
 
@@ -95,7 +106,7 @@ class QuizSessionViewSet(viewsets.ModelViewSet):
         # get next random question
         next_question = Question.objects.annotate(
             attempts_count=Count('quizattempt', 
-                filter=models.Q(quizattempt__session__user=request.user))
+                filter=Q(quizattempt__session__user=request.user))
         ).exclude(
             quizattempt__session__user=request.user
         ).order_by('?').first()
@@ -119,3 +130,41 @@ class QuizSessionViewSet(viewsets.ModelViewSet):
             "question": next_question_serializer.data
         }, status=status.HTTP_200_OK)
 
+
+
+class QuizStatisticsView(viewsets.ViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        try:
+
+            sessions = QuizSession.objects.filter(user=request.user).annotate(
+                score=ExpressionWrapper(
+                    F('correct_answers') * 100.0 / F('total_questions'),
+                    output_field=FloatField()
+                )
+            )
+
+            total_quiz_sessions = sessions.count()
+            best_score = sessions.aggregate(Max('score'))['score__max'] or 0
+            avg_score = sessions.aggregate(Avg('score'))['score__avg'] or 0.0
+
+            serializer = StatisticsSerializer(sessions, many=True)
+
+            response_data = {
+                "stats": {
+                    "total_quiz_sessions": total_quiz_sessions,
+                    "best_score": round(best_score, 1),
+                    "avg_score": round(avg_score, 1),
+                },
+                "sessions": serializer.data,
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+        
+        except Exception as err:
+            print(err)
+            return Response({
+                "error": "something went wrong"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        

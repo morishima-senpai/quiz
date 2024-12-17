@@ -1,16 +1,15 @@
-import React, {
-    createContext, useState, useContext, useEffect
-} from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { authService } from '../../services/api';
-import {
-    AuthContextType, LoginCredentials, User
-} from '../../services/types';
-
-
+import { AuthContextType, LoginCredentials, User } from '../../types';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }) => {
+interface AuthProviderProps {
+    children: React.ReactNode;
+}
+
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(null);
 
@@ -18,8 +17,7 @@ export const AuthProvider = ({ children }) => {
         const storedToken = localStorage.getItem('quiz_app_auth_token');
         if (storedToken) {
             setToken(storedToken);
-            // TODO: Add endpoint to fetch user details
-            // setUser(...)
+            fetchStats();
         }
     }, []);
 
@@ -28,8 +26,14 @@ export const AuthProvider = ({ children }) => {
             const response = await authService.login(credentials);
             localStorage.setItem('quiz_app_auth_token', response.token);
             setToken(response.token);
-            // TODO: Set user details from response
+            if (response.token) {
+                setUser(prevUser  => ({
+                    ...prevUser,
+                    username: credentials.username
+                } as any));
+            }
         } catch (error) {
+            console.error('Login failed:', error);
             throw error;
         }
     };
@@ -40,8 +44,33 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
+    const fetchStats = async () => {
+        try {
+            const response = await authService.getUserStats();
+            if (response.stats) {
+                setUser(prevUser  => ({
+                    ...prevUser,
+                    statistics: response.stats,
+                    attempts: response?.sessions
+                } as any));
+
+            }
+        } catch (error) {
+            console.error('User stat fetch failed:', error);
+            throw error;
+        }
+    };
+
+    const value: AuthContextType = {
+        user,
+        token,
+        login,
+        logout,
+        fetchStats
+    };
+
     return (
-        <AuthContext.Provider value={{ user, token, login, logout }}>
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
     );

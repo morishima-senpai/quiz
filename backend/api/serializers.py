@@ -9,7 +9,7 @@ class QuestionOptionSerializer(serializers.ModelSerializer):
 
 
 class QuestionSerializer(serializers.ModelSerializer):
-    options = QuestionOptionSerializer(source="question.options", many=True)
+    options = QuestionOptionSerializer(many=True)
 
     class Meta:
         model = Question
@@ -34,3 +34,21 @@ class QuizSessionSerializer(serializers.ModelSerializer):
         # automatically set the user to the current user
         validated_data['user'] = self.context['request'].user
         return super().create(validated_data)
+
+
+class StatisticsSerializer(serializers.ModelSerializer):
+    score = serializers.FloatField(read_only=True)
+    class Meta:
+        model = QuizSession
+        fields = ["started_at", "total_questions", "correct_answers", "score"]
+
+    def to_representation(self, instance):
+            representation = super().to_representation(instance)
+            representation['started_at'] = instance.started_at.strftime("%d %b %Y %I:%M %p")
+            representation['score'] = round(instance.score, 1) if instance.score else None
+            return representation
+
+
+class AttemptSerializer(serializers.Serializer):
+    question_id = serializers.UUIDField()
+    option_id = serializers.IntegerField()
