@@ -43,12 +43,15 @@ class StatisticsSerializer(serializers.ModelSerializer):
         fields = ["started_at", "total_questions", "correct_answers", "score"]
 
     def to_representation(self, instance):
-            representation = super().to_representation(instance)
-            representation['started_at'] = instance.started_at.strftime("%d %b %Y %I:%M %p")
-            representation['score'] = round(instance.score, 1) if instance.score else None
-            return representation
+        representation = super().to_representation(instance)
+        representation['started_at'] = instance.started_at.strftime("%d %b %Y %I:%M %p")
+        representation['score'] = round(instance.score, 1) if instance.score else None
+        return representation
 
 
 class AttemptSerializer(serializers.Serializer):
     question_id = serializers.UUIDField()
     option_id = serializers.IntegerField()
+
+class SkipAndFinishSerializer(serializers.Serializer):
+    skip = serializers.BooleanField()

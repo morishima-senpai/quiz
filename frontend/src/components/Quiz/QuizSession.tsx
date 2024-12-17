@@ -13,7 +13,8 @@ const QuizSession: React.FC = () => {
         error,
         startNewQuizSession,
         submitAnswer,
-        resetQuiz
+        resetQuiz,
+        skipAndFinish
     } = useQuizState();
 
     useEffect(() => {
@@ -88,6 +89,7 @@ const QuizSession: React.FC = () => {
                     <QuizQuestion
                         question={session.question}
                         onAnswerSelect={submitAnswer}
+                        onSkipClicked={skipAndFinish}
                         disabled={loading}
                     />
                 </>

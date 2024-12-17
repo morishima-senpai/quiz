@@ -5,12 +5,13 @@ import Button from '../Common/Button';
 interface QuizQuestionProps {
     question: Question;
     onAnswerSelect: (optionId: string) => void;
+    onSkipClicked: () => void;
     disabled?: boolean;
 }
 
 
 
-const QuizQuestion: React.FC<QuizQuestionProps> = ({ question,  onAnswerSelect, disabled = false }) => {
+const QuizQuestion: React.FC<QuizQuestionProps> = ({ question,  onAnswerSelect, onSkipClicked, disabled = false }) => {
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -20,6 +21,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({ question,  onAnswerSelect, 
             setSelectedOption(null);
         }
     };
+
 
     return (
         <div className="space-y-6">
@@ -76,6 +78,14 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({ question,  onAnswerSelect, 
                     className="w-full"
                 >
                     {disabled ? 'Submitting...' : 'Submit Answer'}
+                </Button>
+                <Button
+                    type="button"
+                    variant={"secondary"}
+                    onClick={onSkipClicked}
+                    className="w-full"
+                >
+                    Skip and Finish
                 </Button>
             </form>
         </div>

@@ -25,9 +25,7 @@ const AttemptPage: React.FC = () => {
     useEffect(() => {
         const loadStats = async () => {
             try {
-                if(!user?.attempts){
-                    await fetchStats();
-                }
+                await fetchStats();
             } finally {
                 setLoading(false);
             }

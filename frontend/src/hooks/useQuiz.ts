@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { quizService } from '../services/api';
 import { 
-    QuizSessionResponse, 
     AnswerSubmitResponse, 
     Question 
 } from '../types';

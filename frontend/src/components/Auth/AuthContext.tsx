@@ -38,7 +38,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
-    const logout = () => {
+    const logout = async () => {
+        await authService.logout();
         localStorage.removeItem('quiz_app_auth_token');
         setToken(null);
         setUser(null);

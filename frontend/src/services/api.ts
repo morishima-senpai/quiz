@@ -31,6 +31,11 @@ export const authService = {
         return response.data;
     },
 
+    logout: async () => {
+        const response = await api.post('/auth/logout/');
+        return response.data;
+    },
+
     getUserStats: async () => {
         const response = await api.get('/stats/');
         return response.data;
@@ -47,7 +52,15 @@ export const quizService = {
     submitAnswer: async (sessionId: string, questionId: string, optionId: string) => {
         const response = await api.post<AnswerSubmitResponse>(
             `/sessions/${sessionId}/submit_answer/`,
-            { question_id: questionId, option_id: optionId }
+            { question_id: questionId, option_id: optionId}
+        );
+        return response.data;
+    },
+
+    skipAndFinish: async (sessionId: string) => {
+        const response = await api.post<AnswerSubmitResponse>(
+            `/sessions/${sessionId}/skip_and_finish/`,
+            { skip: true}
         );
         return response.data;
     }

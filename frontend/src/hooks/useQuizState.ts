@@ -103,6 +103,41 @@ export const useQuizState = () => {
         }
     }, [state.session, showToast]);
 
+    const skipAndFinish = useCallback(async () => {
+        if (!state.session) return;
+
+        setState(prev => ({ ...prev, loading: true }));
+        try {
+            const response = await quizService.skipAndFinish(
+                state.session.session_id,
+            );
+
+            if (response.session_complete) {
+                setState(prev => ({
+                    ...prev,
+                    summary: response,
+                    loading: false
+                }));
+                showToast('Quiz completed!', 'success');
+            } else {
+
+                showToast('Could not skip', 'warning');
+                // showToast(
+                //     response.is_correct ? 'Correct answer!' : 'Incorrect answer',
+                //     response.is_correct ? 'success' : 'error'
+                // );
+            }
+        } catch (err) {
+            setState(prev => ({
+                ...prev,
+                error: 'Failed to submit answer',
+                loading: false
+            }));
+            showToast('Failed to submit answer', 'error');
+        }
+    }, [state.session, showToast]);
+
+
     const resetQuiz = useCallback(() => {
         setState({
             session: null,
@@ -116,7 +151,8 @@ export const useQuizState = () => {
         ...state,
         startNewQuizSession,
         submitAnswer,
-        resetQuiz
+        resetQuiz,
+        skipAndFinish
     };
 };
 
